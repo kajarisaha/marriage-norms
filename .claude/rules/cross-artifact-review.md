@@ -1,6 +1,6 @@
 ---
-description: Paper ↔ code cross-artifact review — when /review-paper runs, auto-invoke /review-r on referenced scripts and /audit-reproducibility on the pair. Surface cross-artifact findings alongside the paper review.
-paths: ["master_supporting_docs/**/*.tex", "master_supporting_docs/**/*.qmd", "Slides/**/*.tex", "*.tex", "*.qmd"]
+description: Paper/slides ↔ code cross-artifact review — when /review-paper runs, auto-invoke /audit-reproducibility (and /review-r only if R scripts are referenced) on the pair. Surface cross-artifact findings alongside the paper review.
+paths: ["paper/**/*.tex", "slides/**/*.tex", "*.tex"]
 ---
 
 # Cross-Artifact Review Protocol
@@ -10,15 +10,15 @@ A paper is not an island. Its claims depend on the code that produced them. Revi
 ## The Dependency Graph
 
 ```
-manuscript.tex ──cites──> Table 2
-Table 2        ──from──> scripts/R/_outputs/results.rds
-results.rds    ──by──> scripts/R/03_analyze.R
-03_analyze.R   ──uses──> scripts/R/_outputs/clean.rds
-clean.rds      ──by──> scripts/R/02_clean.R
-02_clean.R     ──reads──> data/raw.csv
+paper.tex        ──cites──> Table 2
+Table 2          ──from──> output/tables/tab_main.tex
+tab_main.tex     ──by──> scripts/stata/03_analyze.do
+03_analyze.do    ──uses──> scripts/stata/_outputs/clean_panel.dta
+clean_panel.dta  ──by──> scripts/stata/01_clean.do
+01_clean.do      ──reads──> data/raw/elmps_2023.dta
 ```
 
-A bug in `02_clean.R` invalidates Table 2. Reviewing `manuscript.tex` without touching the code misses this class of error entirely.
+A bug in `01_clean.do` invalidates Table 2. Reviewing `paper.tex` without touching the code misses this class of error entirely. **No `/review-r`-equivalent code-quality reviewer exists for Stata yet** (`stata-code-conventions.md` §Enforcement notes this gap) — cross-artifact review for this project runs `/audit-reproducibility` only, unless a referenced script is actually R.
 
 ## When to apply
 
@@ -26,10 +26,10 @@ Applies when `/review-paper` runs on a manuscript that references analysis scrip
 
 Detection signals:
 
-- `\input{scripts/R/...}` or `\input{tables/...}`
-- `%% source: scripts/R/03_analyze.R` comments
-- Numeric claims in text (ATT, coefficients, N, p-values) **combined with** a sibling `scripts/R/` / `scripts/stata/` / `scripts/python/` directory
-- Table labels in the paper that match filenames under `scripts/*/\_outputs/`
+- `\input{output/tables/...}` or `\input{scripts/stata/_outputs/...}`
+- `%% source: scripts/stata/03_analyze.do` comments
+- Numeric claims in text (ATT, coefficients, N, p-values) **combined with** the `scripts/stata/` directory
+- Table labels in the paper that match filenames under `output/tables/` or `scripts/stata/_outputs/`
 
 Detection is intentionally conservative — a theory paper with no code should not trigger the protocol, even if it lives in a repo that has scripts for other work.
 
@@ -43,17 +43,21 @@ Scan the manuscript for:
 
 - `\input{path}` commands (tables, figures pulled from files)
 - Line comments `%% from: scripts/...`
-- Table labels that match filenames in `scripts/R/_outputs/` (e.g., `Table:main_ATT` ↔ `results_main.rds`)
+- Table labels that match filenames in `output/tables/` or `scripts/stata/_outputs/` (e.g., `Table:main_ATT` ↔ `tab_main.tex`)
 
 Build a list of scripts that produced content in this paper.
 
-### 2. Auto-invoke `/review-r`
+### 2. Auto-invoke `/review-r` (only if an identified script is R)
 
-For each identified R script, launch `/review-r` in a forked subagent (`context: fork`). Save reports to `quality_reports/cross_artifact_[paper]/review_r_[script].md`.
+For each identified script that is actually R (not the expected case in this project), launch
+`/review-r` in a forked subagent (`context: fork`). Save reports to
+`quality_reports/cross_artifact_[paper]/review_r_[script].md`. For Stata `.do` scripts, skip
+this step — there is no code-quality reviewer for Stata yet — and rely on `/audit-reproducibility`
+(step 3) to catch numeric drift.
 
 ### 3. Auto-invoke `/audit-reproducibility`
 
-Run `/audit-reproducibility $manuscript scripts/R/_outputs/` once. Save to `quality_reports/cross_artifact_[paper]/reproducibility.md`.
+Run `/audit-reproducibility $manuscript scripts/stata/_outputs/` once (it also reads `output/tables/`). Save to `quality_reports/cross_artifact_[paper]/reproducibility.md`.
 
 ### 4. Surface cross-artifact findings
 

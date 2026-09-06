@@ -123,9 +123,63 @@ For one-tailed contexts (rare in published work), use `* 0.05 ** 0.025 *** 0.005
 
 ## 6. Clustering and SE conventions
 
-- **Always cluster at the level of treatment assignment** (or the highest plausible level of dependence). Never use default `, robust` without justification.
+- **This project's specification, always:** individual FE + year FE + governorate×year FE,
+  clustered at the individual level, regardless of outcome or specification:
+
+  ```stata
+  reghdfe y treatment, absorb(individual_id year governorate#year) vce(cluster individual_id)
+  ```
+
+  Do not substitute `, cluster()` for `, vce(cluster ...)`, and do not drop the
+  `governorate#year` term for "a simpler spec" without flagging it explicitly as a robustness
+  check, not the main spec.
 - **`reghdfe` defaults to df-adjusted clustering** but check — Stata's `, cluster()` and `reghdfe ... , cluster()` use different df adjustments in some edge cases. The version pin at top of file is partial defence; explicit `, dofadj() ` is the rest.
-- **Bootstrap clustering** for very small clusters (< 50 groups): use `cluster bootstrap` not `bootstrap, cluster()`.
+- **Bootstrap clustering** for very small clusters (< 50 groups): use `cluster bootstrap` not `bootstrap, cluster()`. Not expected to bind here (ELMPS individual-level clusters are large), but keep the discipline for any subgroup analysis with a small number of governorates.
+
+## 6b. Data availability by round — check before writing any code
+
+ELMPS covers rounds **1998, 2006, 2012, 2018, 2023**. Outcome availability is round-specific,
+not universal — the single most common way a `.do` file in this project goes wrong is
+estimating an outcome on a round it doesn't exist in:
+
+| Outcome | 1998 | 2006 | 2012 | 2018 | 2023 |
+|---|:-:|:-:|:-:|:-:|:-:|
+| Labor force participation | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Domestic work hours | | | ✓ | ✓ | |
+| Gender role attitudes — women | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Gender role attitudes — men | | | | ✓ | ✓ |
+
+Before estimating any spec on one of these outcomes:
+
+1. Restrict the sample to the rounds where the outcome is actually collected — `keep if inlist(year, 2012, 2018)` for domestic work hours, `keep if inlist(year, 2018, 2023) & sex == 1` for men's gender-role attitudes, etc.
+2. State the round restriction in the `.do` file's header comment and in any table note — a
+   reader of `output/tables/tab_domestic_work.tex` should not have to guess it's a 2-round panel.
+3. Never pool rounds where an outcome is missing as though it were legitimately absent
+   (attrition) rather than not-asked (survey design) — Stata will happily run a regression on
+   whatever non-missing rows remain, silently dropping the rounds where the question wasn't
+   fielded, and the resulting N will look plausible without the sample actually meaning what the
+   table implies.
+
+## 6c. Kleven hybrid pseudo-panel + event-study checklist
+
+Following Kleven's "The Child Penalty Atlas" methodology for the marriage/childbirth event
+study:
+
+- **Event time is anchored to the individual event** (first marriage date, or first birth date)
+  — not calendar year. Construct `event_time = year - marriage_year` (or `- first_birth_year`)
+  before collapsing to cohort/event-time cells.
+- **Reference period is normalized to exactly one period**, conventionally `event_time == -1`
+  (the last pre-event observation) — state explicitly which period is omitted, since the
+  estimating equation's coefficients are relative to it, not to zero.
+- **Pseudo-cohort construction** (when true panel linkage is broken by attrition or by
+  ELMPS's round spacing not aligning with event time) groups individuals into cohorts by
+  birth-year/marriage-year bins, and the pseudo-panel outcome is the **cohort-period mean**, not
+  the individual value — verify the collapse (`collapse (mean) y, by(cohort event_time)`)
+  happens before the event-study regression, not after.
+- **Report whether a given event-study result is estimated on the true panel or the
+  pseudo-panel** — they have different standard-error structures (pseudo-panel SEs need a
+  grouped/cluster correction for the number of underlying individuals per cell, not just the
+  number of cells).
 
 ## 7. Balance / attrition discipline
 
@@ -143,6 +197,27 @@ graph export "scripts/stata/_outputs/fig_eventstudy.png", replace as(png) width(
 ```
 
 Both vector (PDF for the paper) and raster (PNG for slides). Don't rely on the auto-generated `.gph` — it's not portable across Stata versions.
+
+## 8b. coefplot conventions (recurring source of malformed figures)
+
+Four hard rules, all learned the hard way — verify each before shipping an event-study or
+coefficient-plot figure:
+
+- **Never `noalphabetical`.** It silently reorders coefficients away from the order you specified
+  in the plot command, which is exactly backwards for an event-study plot where order = time.
+- **Degree symbol is `{char 176}`, never `{&deg}`.** `{&deg}` is a Stata Markup and Control
+  Language SMCL directive that does not render in graph text; `{char 176}` is the actual degree
+  glyph. This matters anywhere an axis label needs a degree symbol.
+- **`ciopts(lcolor(...))` colors are assigned per model, not per coefficient.** When plotting
+  multiple `eststo` models on one coefplot, `ciopts(lcolor(color1 color2 ...))` supplies one
+  color **per model**, in model order — it is not a per-coefficient palette. Supplying N
+  coefficient colors when you have M models (N ≠ M) either errors or silently mis-assigns colors.
+- **`levels(95 90)` needs two colors in `ciopts lcolor()`.** Plotting two confidence levels means
+  `ciopts(lcolor(color1 color2))` must supply exactly two colors — one per level, not per model —
+  when `levels()` itself has two values. (This and the previous rule both consume `ciopts
+  lcolor()`, so combining multi-model **and** multi-level in one plot needs care: check
+  `coefplot`'s own documentation for how the two axes of color assignment combine before assuming
+  either rule alone.)
 
 ## 9. Common Stata → R / Stata → AEA traps
 

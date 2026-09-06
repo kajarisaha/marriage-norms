@@ -52,8 +52,12 @@ CLAUDE.local.md
 *.swo
 *~
 
-# Quarto rendering artifacts
-.quarto/
+# Restricted / raw microdata — never commit ELMPS microdata (confidential-data.md)
+data/raw/
+data/restricted/
+data/confidential/
+*.dta
+*.sav
 
 # quality_reports/ — per-project session logs, plans, specs, merges, audits,
 # diagnoses. The directory structure ships in the template (via .gitkeep), but
@@ -86,7 +90,6 @@ scripts/R/_outputs/
 # *.rds
 # output/**/*.rds
 
-# Quarto render artifacts beside their .qmd sources (regenerable; quality_score
-# renders them during gating). Published HTML lives in docs/, never here.
-Quarto/*.html
-Quarto/*_files/
+# Stata pipeline outputs (regenerable; keep scripts, ignore logs/derived data)
+scripts/stata/_outputs/*.smcl
+scripts/stata/_outputs/sessionInfo.txt

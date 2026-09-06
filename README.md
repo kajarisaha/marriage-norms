@@ -133,7 +133,9 @@ Multiple complementary verification layers run before submission:
 
 ## The Guide
 
-For a comprehensive walkthrough, read the **[full guide](https://psantanna.com/claude-code-my-workflow/workflow-guide.html)** (or see the [source](guide/workflow-guide.qmd)).
+The upstream template's long-form guide (`guide/`, published via GitHub Pages) was removed in
+this fork along with the rest of the Quarto/GitHub-Pages publish path — this repo has no public
+landing page to maintain. See the upstream project for the full guide.
 
 It covers:
 1. **Why This Workflow Exists** — the problem and the vision
@@ -189,7 +191,7 @@ This workflow is designed as a **single hub for an entire research program** —
 ## What's Included
 
 <details>
-<summary><strong>18 agents, 60 skills, 37 rules, 8 hooks</strong> (click to expand)</summary>
+<summary><strong>14 agents, 50 skills, 36 rules, 8 hooks</strong> (click to expand)</summary>
 
 ### Agents (`.claude/agents/`)
 
@@ -198,14 +200,10 @@ This workflow is designed as a **single hub for an entire research program** —
 |-------|-------------|
 | `proofreader` | Grammar, typos, overflow, consistency review |
 | `slide-auditor` | Visual layout audit (overflow, font consistency, spacing) |
-| `pedagogy-reviewer` | 13-pattern pedagogical review (narrative arc, notation density, pacing) |
-| `r-reviewer` | R code quality, reproducibility, and domain correctness |
+| `r-reviewer` | R code quality, reproducibility, and domain correctness (dormant — no R pipeline in this fork) |
 | `tikz-reviewer` | Merciless TikZ diagram visual critique |
-| `beamer-translator` | Beamer-to-Quarto translation specialist |
-| `quarto-critic` | Adversarial QA comparing Quarto against Beamer benchmark |
-| `quarto-fixer` | Implements fixes from the critic agent |
 | `verifier` | End-to-end task completion verification |
-| `domain-reviewer` | **Template** for your field-specific substance reviewer |
+| `domain-reviewer` | Empirical-micro/causal-identification substance reviewer (TWFE, Kleven event-study, round-availability) |
 | `claim-verifier` (v1.7.0) | Chain-of-Verification fact-checker in a forked context |
 | `editor` (v1.5.0) | Journal editor for `/review-paper --peer` (desk review + referee selection + synthesis) |
 | `domain-referee` (v1.5.0) | Disposition-primed substance referee for `--peer` mode |
@@ -220,16 +218,12 @@ This workflow is designed as a **single hub for an entire research program** —
 <!-- surface-sync-table: skills -->
 | Skill | What It Does |
 |-------|-------------|
-| `/compile-latex` | 3-pass XeLaTeX compilation with bibtex |
-| `/deploy` | Render Quarto + sync to GitHub Pages |
-| `/extract-tikz` | TikZ diagrams to PDF to SVG pipeline |
+| `/compile-latex` | 3-pass XeLaTeX compilation with bibtex (`slides/` or `paper/`) |
+| `/extract-tikz` | TikZ diagrams to PDF to SVG pipeline (dormant unless slides use TikZ) |
 | `/proofread` | Launch proofreader on a file |
 | `/visual-audit` | Launch slide-auditor on a file |
-| `/pedagogy-review` | Launch pedagogy-reviewer on a file |
-| `/review-r` | Launch R code reviewer |
-| `/qa-quarto` | Adversarial critic-fixer loop (loops until dry; 5-round cap is a fallback) |
+| `/review-r` | Launch R code reviewer (dormant — no R pipeline in this fork) |
 | `/slide-excellence` | Combined multi-agent review |
-| `/translate-to-quarto` | Full Beamer-to-Quarto translation — Phase 0 pre-flight plus 11 translation phases |
 | `/vaccinate` | Measure whether a check, gate, or AI reviewer actually detects the failure it targets — seeds defects + a clean control, reports recall and false-positive rate into a qualification ledger |
 | `/adjudicate-review` | Turn incoming findings — AI review, referee report, linter, second model — into verified fixes. Every finding is a CANDIDATE until checked against the source |
 | `/blast-radius` | Before and after changing anything shared (return value, schema, default, units), enumerate every consumer and actually run them |
@@ -239,14 +233,12 @@ This workflow is designed as a **single hub for an entire research program** —
 | `/verify-artifact` | Prove the file you are about to send IS the thing you mean — rebuild, verify integrity, diff against source |
 | `/voice-profile` | Extract a written voice profile from your own prior papers, then audit drafts against it — the positive counterpart to `/humanize`, which only detects AI tells |
 | `/validate-bib` | Cross-reference citations against bibliography |
-| `/devils-advocate` | Challenge design decisions before committing |
-| `/create-lecture` | Full lecture creation workflow |
 | `/commit` | Stage, commit, create PR, and merge to main |
 | `/lit-review` | Literature search, synthesis, and gap identification |
 | `/research-ideation` | Generate research questions and empirical strategies |
 | `/interview-me` | Interactive interview to formalize a research idea |
 | `/review-paper` | Manuscript review: structure, econometrics, referee objections |
-| `/data-analysis` | End-to-end R analysis with publication-ready output |
+| `/data-analysis` | End-to-end R analysis with publication-ready output (dormant — no R pipeline in this fork) |
 | `/learn` | Extract non-obvious discoveries into persistent skills |
 | `/context-status` | Show session health and context usage |
 | `/deep-audit` | Repository-wide consistency audit |
@@ -275,10 +267,6 @@ This workflow is designed as a **single hub for an entire research program** —
 | `/triage-inbox` (v2.0) | Schedulable academic inbox + calendar triage via Gmail/Calendar MCP — classifies referee requests, R&R/editor, co-author threads, seminar/conference invites, grant/admin deadlines; proposes one human-gated action each (draft reply, calendar hold, scaffold a referee project, `/coauthor-brief`, snooze); emits a digest + referee-obligations tracker; degrades gracefully when MCP is absent; never auto-sends |
 | `/diagnose` (v2.0) | Root-cause a wrong/failing empirical result — disciplined reproduce → minimise → hypothesise → instrument → fix loop; tuned for research-code bugs (type coercion, NA/merge blow-ups, clustering/SE choice, seed/package-version drift); `--no-fix` localizes without editing |
 | `/submission-disclosures` (v2.1) | The submission-time disclosure block: AI-use disclosure matched to the target journal's verified-current policy, CRediT contributor roles, conflict-of-interest, and data-availability statements (NOT statistical disclosure — that's `/disclosure-check`) |
-| `/syllabus` (v2.0) | Build/restructure a course syllabus from a topic or reading list — course description + prerequisites, week-by-week schedule (topic→readings→deliverables), measurable learning objectives, assessment scheme + rubric, standard policies (late work / AI use / integrity / accessibility), and a per-week work-list mapping weeks to `/create-lecture` decks; economics-aware (PhD metrics/micro/macro sequences, undergrad) |
-| `/teach-from-paper` (v2.0) | Reads a paper end-to-end and pitches it to a stated audience level — lecture outline (motivation → setup → key result → method → takeaways), the 3-5 results worth presenting with intuition, a slide skeleton for `/create-lecture`, discussion questions, and a problem-set brief for `/scaffold-exercises` |
-| `/respond-to-eval` (v2.0) | Teaching analogue of `/respond-to-referees` — clusters course-eval comments into themes, weights by frequency (signal vs noise), classifies Keep / Change / Investigate / Out-of-scope, and drafts concrete changes mapped to the syllabus + slide decks; saves the plan to `quality_reports/teaching/` |
-| `/scaffold-exercises` (v2.0) | Scaffold a graded problem set across analytical/empirical/coding types, with worked solutions and "why this matters" explainers emitted to a separate solution key |
 | `/new-skill` (v2.0) | Scaffold a new skill that follows this repo's conventions — interviews for purpose, triggers, and tools, writes `.claude/skills/<name>/SKILL.md` from the template with frontmatter/body that pass `check-skill-integrity.py` first try, then reminds to add the surface-table rows |
 
 ### Research Workflow
@@ -318,7 +306,6 @@ Rules use path-scoped loading: **always-on** rules load every session; **path-sc
 | `quality-gates` | `.tex`, `.qmd`, `*.R` | 80/90/95 scoring + tolerance thresholds |
 | `r-code-conventions` | `*.R` | R coding standards + math line-length exception |
 | `tikz-visual-quality` | `.tex` | TikZ diagram visual standards |
-| `beamer-quarto-sync` | `.tex`, `.qmd` | Auto-sync Beamer edits to Quarto |
 | `pdf-processing` | `master_supporting_docs/` | Safe large PDF handling |
 | `proofreading-protocol` | `.tex`, `.qmd`, `quality_reports/` | Propose-first, then apply with approval |
 | `no-pause-beamer` | `.tex` | No overlay commands in Beamer |
@@ -392,11 +379,10 @@ Rules use path-scoped loading: **always-on** rules load every session; **path-sc
 
 1. **Fill in the knowledge base** (`.claude/rules/knowledge-base-template.md`) with your notation, applications, and design principles
 2. **Customize the domain reviewer** (`.claude/agents/domain-reviewer.md`) with review lenses specific to your field
-3. **Update the color palette** — this is a **two-surface contract**: change the HEX values at the top of **both** [`Preambles/header.tex`](Preambles/header.tex) (Beamer/TikZ) **and** [`Quarto/theme-template.scss`](Quarto/theme-template.scss) (Quarto slides) so they agree. Then run `./scripts/check-palette-sync.sh` to verify. Forgetting one surface silently produces mismatched Beamer vs. Quarto renderings. See [`Preambles/README.md`](Preambles/README.md) for the full contract and the TikZ style library.
-4. **Add field-specific R pitfalls** to `.claude/rules/r-code-conventions.md`
-5. **Fill in the lecture mapping** in `.claude/rules/beamer-quarto-sync.md`
-6. **Customize the workflow quick reference** (`.claude/WORKFLOW_QUICK_REF.md`) with your non-negotiables and preferences
-7. **Set up the exploration folder** (`explorations/`) for experimental work
+3. **Update the color palette** — change the HEX values at the top of [`preambles/header.tex`](preambles/header.tex). A fork that keeps the Quarto pipeline needs the two-surface SCSS contract this section used to describe; a Beamer-only fork (like this one) has a single source of truth and nothing to sync.
+4. **Add field-specific R pitfalls** to `.claude/rules/r-code-conventions.md` (only relevant if your fork keeps an R pipeline)
+5. **Customize the workflow quick reference** (`.claude/WORKFLOW_QUICK_REF.md`) with your non-negotiables and preferences
+6. **Set up the exploration folder** (`explorations/`) for experimental work
 
 ---
 
