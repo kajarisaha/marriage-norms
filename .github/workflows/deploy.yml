@@ -1,0 +1,38 @@
+name: deploy-guide
+
+# Verifies the guide on every push to main that touches guide source.
+#
+# VERIFY-ONLY by design (v2.5.0 post-release fix). The committed, stamped
+# artifacts (guide/workflow-guide.html + docs/workflow-guide.html +
+# .render-stamp) are authoritative — the local render + stamp-render.sh flow
+# produces them, and the staleness gate binds them to the source by content
+# fingerprint. CI must NOT push a re-render: (a) the repo rule requires
+# changes via PR, so the old push step failed on every release merge; and
+# (b) a different Quarto build produces byte-different HTML, so a CI render
+# would fight the stamp. Instead this job proves two things:
+#   1. the committed tree passes all gates (incl. source<->render stamp), and
+#   2. the guide still renders from scratch on a clean machine.
+# GitHub Pages serves docs/ directly; no CI commit is needed for deploys.
+# (The runner is ephemeral, so the CI render's output is simply abandoned.)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "guide/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Verify gates on the committed tree
+        run: ./scripts/backtest.sh
+      - name: Renderability smoke check (output abandoned with the runner)
+        run: |
+          quarto render guide/workflow-guide.qmd
+          echo "render OK — committed artifacts remain authoritative"

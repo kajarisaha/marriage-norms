@@ -1,0 +1,28 @@
+name: gates
+
+# Runs the deterministic, toolchain-free gate suite on every PR and push to a
+# feature branch — the same checks the local pre-commit hook runs, enumerated
+# in one place only (scripts/backtest.sh), so adding a gate never leaves a
+# stale list here. Quality scoring (which needs Quarto / R) stays local; CI
+# guards the cheap, high-signal invariants.
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main   # main is protected by the PRs that merge into it
+
+permissions:
+  contents: read
+
+jobs:
+  surface-sync:
+    name: backtest (the full gate suite — see scripts/backtest.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run gate suite
+        run: ./scripts/backtest.sh
