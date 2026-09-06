@@ -6,6 +6,39 @@ If you have forked this template, see the **Upgrading** section at the bottom fo
 
 ---
 
+## v2.5.1-marriage-norms — 2026-09-06
+
+Project-specific customization for a PhD dissertation chapter (TWFE + Kleven-style hybrid
+pseudo-panel/panel event-study analysis of marriage/childbirth effects on gender-role attitudes
+in Egypt, ELMPS 1998-2023). Not a template release — a fork configuring the template for one
+project, recorded here because the topmost entry is what `check-derived-counts.py` reads as the
+current inventory (see `changelog_current_release()` in `scripts/check-derived-counts.py`).
+
+### Removed
+- The Quarto/RevealJS + GitHub Pages publish path in its entirety: `Quarto/`, `docs/`, `guide/`,
+  `beamer-quarto-sync.md`, `single-source-of-truth.md`'s Quarto chain, the `qa-quarto` /
+  `translate-to-quarto` / `deploy` skills, and the `quarto-critic` / `quarto-fixer` /
+  `beamer-translator` agents.
+- Course-teaching skills/agents not relevant to a dissertation chapter: `create-lecture`,
+  `syllabus`, `scaffold-exercises`, `teach-from-paper`, `respond-to-eval`, `pedagogy-review` +
+  `pedagogy-reviewer`, `devils-advocate`.
+
+### Changed
+- Directories renamed for a research-paper (not course-lecture) layout: `Slides/`→`slides/`,
+  `Preambles/`→`preambles/`; `Figures/` retired in favor of `output/figures/`; added `data/`,
+  `paper/`, `output/tables/`, `scripts/stata/`.
+- `stata-code-conventions.md` tuned to this project's FE/clustering spec, ELMPS round-availability
+  table, coefplot conventions, and Kleven event-study checklist.
+- `domain-reviewer.md` reconfigured from a generic lecture-content reviewer to an empirical-micro/
+  causal-identification referee (TWFE assumptions, Kleven event-study construction, round
+  availability, spec-narrative parity).
+- R pipeline (`r-code-conventions.md`, `r-reviewer`, `/review-r`, `/data-analysis`, R-package and
+  simulation tooling) left in place but dormant — no R in this project's pipeline.
+
+**Inventory at release: 50 skills, 14 agents, 36 rules, 8 hooks, 10 gates**
+
+---
+
 ## v2.5.1 — 2026-08-24
 
 An **enforcement release.** Disciplines that had been working conventions in the owner's

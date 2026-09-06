@@ -1,7 +1,7 @@
 ---
 paths:
-  - "Slides/**/*.tex"
-  - "Quarto/**/*.qmd"
+  - "slides/**/*.tex"
+  - "paper/**/*.tex"
   - "scripts/**/*.R"
 ---
 
@@ -15,21 +15,7 @@ paths:
 - **90/100 = PR** -- ready for deployment
 - **95/100 = Excellence** -- aspirational
 
-## Quarto Slides (.qmd)
-
-| Severity | Issue | Deduction |
-|----------|-------|-----------|
-| Critical | Compilation failure | -100 |
-| Critical | Equation overflow | -20 |
-| Critical | Broken citation | -15 |
-| Critical | Typo in equation | -10 |
-| Major | Text overflow | -5 |
-| Major | TikZ label overlap | -5 |
-| Major | Notation inconsistency | -3 |
-| Minor | Font size reduction | -1 per slide |
-| Minor | Long lines (>100 chars) | -1 (EXCEPT documented math formulas) |
-
-## R Scripts (.R)
+## R Scripts (.R) — dormant in this project (no R pipeline)
 
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
@@ -60,10 +46,13 @@ Save to `quality_reports/merges/YYYY-MM-DD_[branch-name].md`.
 
 ## Tolerance Thresholds (Research)
 
-<!-- Customize for your domain -->
+Mirrors `replication-protocol.md`'s passport tolerances — used by `/audit-reproducibility` when
+checking a numeric claim in `paper/` or `slides/` against `output/tables/`:
 
 | Quantity | Tolerance | Rationale |
 |----------|-----------|-----------|
-| Point estimates | [e.g., 1e-6] | [Numerical precision] |
-| Standard errors | [e.g., 1e-4] | [MC variability] |
-| Coverage rates | [e.g., +/- 0.01] | [MC with B reps] |
+| Integers (N, counts) | Exact match | No reason for any difference |
+| Point estimates | < 0.01 | Rounding in display |
+| Standard errors | < 0.05 | Clustering/df-adjustment variation |
+| P-values | Same significance level | Exact p may differ slightly |
+| Percentages | < 0.1pp | Display rounding |

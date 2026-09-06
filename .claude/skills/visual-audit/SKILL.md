@@ -1,39 +1,35 @@
 ---
 name: visual-audit
-description: Adversarial visual-layout audit of a Quarto `.qmd` or Beamer `.tex` deck. Flags overflow, font inconsistency, box fatigue, spacing, and alignment issues. Use when user says "visual audit", "check the layout", "does this overflow?", "look for visual issues", "audit the slides", or after reworking a deck's appearance. Does NOT check writing or pedagogy — pair with `/proofread` or `/pedagogy-review`.
-argument-hint: "[QMD or TEX filename]"
+description: Adversarial visual-layout audit of a Beamer `.tex` research-presentation deck. Flags overflow, font inconsistency, box fatigue, spacing, and alignment issues. Use when user says "visual audit", "check the layout", "does this overflow?", "look for visual issues", "audit the slides", or after reworking a deck's appearance. Does NOT check writing quality — pair with `/proofread`.
+argument-hint: "[TEX filename under slides/]"
 allowed-tools: ["Read", "Grep", "Glob", "Write", "Agent", "Task"]
 disallowed-tools: ["Edit", "MultiEdit"]
 ---
 
 # Visual Audit of Slide Deck
 
-Perform a thorough visual layout audit of a slide deck.
+Perform a thorough visual layout audit of a Beamer slide deck.
 
 ## Steps
 
-1. **Read the slide file** specified in `$ARGUMENTS`
+1. **Read the slide file** specified in `$ARGUMENTS` (under `slides/`).
 
-2. **For Quarto (.qmd) files:**
-   - Render with `quarto render Quarto/$ARGUMENTS`
-   - Open in browser to inspect each slide
+2. **Compile and check for overfull hbox warnings** (see `/compile-latex`).
 
-3. **For Beamer (.tex) files:**
-   - Compile and check for overfull hbox warnings
-
-4. **Audit every slide for:**
+3. **Audit every slide for:**
 
    **OVERFLOW:** Content exceeding slide boundaries
    **FONT CONSISTENCY:** Inline font-size overrides, inconsistent sizes
-   **BOX FATIGUE:** 2+ colored boxes on one slide, wrong box types
-   **SPACING:** Missing negative margins, missing fig-align
-   **LAYOUT:** Missing transitions, missing framing sentences, semantic colors
+   **BOX FATIGUE:** 2+ colored boxes on one slide (INV-3 in `content-invariants.md`)
+   **SPACING:** Missing negative margins, tables/figures without explicit width
+   **LAYOUT:** Missing transitions, missing framing sentences before identifying assumptions,
+   overlay usage that doesn't trace to a genuine progressive-disclosure need
 
-5. **Produce a report** organized by slide with severity and recommendations
+4. **Produce a report** organized by slide with severity and recommendations
 
-6. **Follow the spacing-first principle:**
+5. **Follow the spacing-first principle:**
    1. Reduce vertical spacing with negative margins
    2. Consolidate lists
    3. Move displayed equations inline
-   4. Reduce image/SVG size
+   4. Reduce image/figure size
    5. Last resort: font size reduction (never below 0.85em)

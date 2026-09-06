@@ -1,13 +1,50 @@
-# CLAUDE.MD -- Academic Project Development with Claude Code
+# CLAUDE.MD -- Dissertation Chapter Development with Claude Code
 
-<!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
-     Customize Beamer environments and CSS classes for your theme.
-     Keep this file under ~150 lines — Claude loads it every session.
-     See the guide at docs/workflow-guide.html for full documentation. -->
-
-**Project:** [YOUR PROJECT NAME]
-**Institution:** [YOUR INSTITUTION]
+**Project:** Marriage, Parenthood, and Gender Role Attitudes in Egypt
+**Institution:** UC Santa Barbara, Department of Economics (5th-year PhD)
 **Branch:** main
+
+---
+
+## Research Overview
+
+**Central question:** Does the transition to marriage and parenthood shift the gender-role
+attitudes of men and women in Egypt?
+
+**Data:** Egypt Labor Market Panel Survey (ELMPS), rounds 1998, 2006, 2012, 2018, 2023.
+
+**Primary empirical strategy:** two-way fixed effects (individual + year FE), plus a hybrid
+pseudo-panel + panel event-study design following Kleven's "The Child Penalty Atlas"
+methodology.
+
+**Mechanisms:** gender identity (Akerlof & Kranton) and cognitive dissonance. Evidence that
+marriage activates a more traditional female identity comes from labor force participation
+(all 5 rounds) and domestic work hours (2012, 2018 only).
+
+### Data availability by outcome and round — check this before writing any code or claim
+
+| Outcome | 1998 | 2006 | 2012 | 2018 | 2023 |
+|---|:-:|:-:|:-:|:-:|:-:|
+| Labor force participation | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Domestic work hours | | | ✓ | ✓ | |
+| Gender role attitudes — women | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Gender role attitudes — men | | | | ✓ | ✓ |
+
+**Never write a regression, table, or claim touching one of these outcomes without checking
+this table for the rounds it actually covers.** This is the single most common way a spec goes
+wrong in this project, and it is a data-availability fact, not a modeling choice.
+
+### Fixed effects, clustering, and other locked-in conventions
+
+- **FE structure:** individual FE + year FE + governorate×year FE.
+- **Clustering:** always at the individual level, regardless of specification.
+  `reghdfe y x, absorb(individual_id year governorate#year) vce(cluster individual_id)`
+- **coefplot gotchas** (recurring source of malformed figures — see
+  [`stata-code-conventions.md`](.claude/rules/stata-code-conventions.md) for the full writeup):
+  - never `noalphabetical`
+  - degree symbol is `{char 176}`, never `{&deg}`
+  - `ciopts(lcolor(...))` colors are assigned **per model**, not per coefficient
+  - `levels(95 90)` requires **two** colors in `ciopts lcolor()`, one per level
 
 ---
 
@@ -17,10 +54,6 @@
 `.gitignore` edits, helper utilities, or extra tooling that was not requested. If an addition
 looks valuable, **list it as a suggestion at the end** and let the user decide.
 
-A request for a codebook is a request for a codebook. Delivering a codebook plus a README plus
-build scripts plus gitignore edits means the user now has to review four things to accept one,
-and the usual outcome is that all four get thrown away.
-
 **Before adding anything not named in the request, ask.** One line is cheaper than a revert.
 
 ---
@@ -29,7 +62,9 @@ and the usual outcome is that all four get thrown away.
 
 - **Plan first** -- enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
 - **Verify after** -- compile/render and confirm output at the end of every task
-- **Single source of truth** -- Beamer `.tex` is authoritative; Quarto `.qmd` derives from it
+- **Single source of truth** -- Beamer `.tex` is authoritative for slide content, the `.do` file
+  is authoritative for every number, the paper `.tex` is authoritative for prose (see
+  [`single-source-of-truth.md`](.claude/rules/single-source-of-truth.md))
 - **Quality gates** -- nothing ships below 80/100
 - **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to [MEMORY.md](MEMORY.md)
 
@@ -45,7 +80,11 @@ Cross-session context lives in [MEMORY.md](MEMORY.md); past plans, specs, and se
 
 **How we write** — [`writing-with-ai.md`](.claude/rules/writing-with-ai.md): internal vs external-facing documents, why a model cannot make its own output stop reading as model output, and the human-readable standard for anything with your name on it.
 
-**Theory work** — [`theory-proving.md`](.claude/references/theory-proving.md): proof contracts, portfolio search with isolated explorers, counterexample-hunting your own lemmas, adversarial audits, and the rule that an AI-generated proof is a claim, not a theorem.
+**Confidential data** — [`confidential-data.md`](.claude/rules/confidential-data.md): raw ELMPS
+microdata never gets committed (`data/raw/`, `*.dta` are gitignored); disclosure-avoidance
+review applies to any table/figure built on it. **TODO (you):** fill in the actual ELMPS/ERF
+data-use-agreement thresholds (cell-suppression minimum, any IRB protocol number) in that file —
+Claude will not fabricate them.
 
 **The laws** — [`research-agent-laws.md`](.claude/references/research-agent-laws.md): 21 laws for running agents on research infrastructure, each paid for by a real incident.
 
@@ -62,20 +101,23 @@ Nothing clears work until it has a row in [`quality_reports/qualification/LEDGER
 ## Folder Structure
 
 ```
-[YOUR-PROJECT]/
-├── CLAUDE.MD                    # This file
+marriage-norms/
+├── CLAUDE.md
 ├── .claude/                     # Rules, skills, agents, hooks
 ├── Bibliography_base.bib        # Centralized bibliography
-├── Figures/                     # Figures and images
-├── Preambles/header.tex         # LaTeX headers
-├── Slides/                      # Beamer .tex files
-├── Quarto/                      # RevealJS .qmd files + theme
-├── docs/                        # GitHub Pages (auto-generated)
-├── scripts/                     # Utility scripts + R code
-├── quality_reports/             # Plans, session logs, merge reports, decision records
+├── preambles/header.tex         # Shared LaTeX/Beamer preamble
+├── data/                        # ELMPS rounds (raw/ is gitignored — never commit microdata)
+├── scripts/
+│   └── stata/                   # Numbered .do pipeline (00_install ... 99_run_all)
+├── output/
+│   ├── tables/                  # esttab .tex fragments, \input{} into slides/paper
+│   └── figures/                 # graph export (PDF + PNG)
+├── slides/                      # Beamer .tex research-presentation decks (from Overleaf)
+├── paper/                       # Dissertation chapter / paper draft .tex
 ├── explorations/                # Research sandbox (see rules)
+├── quality_reports/             # Plans, session logs, merge reports, decision records
 ├── templates/                   # Session log, quality report templates
-└── master_supporting_docs/      # Papers and existing slides
+└── scripts/R/                   # Dormant — not used in this project (Stata-only pipeline)
 ```
 
 ---
@@ -83,28 +125,25 @@ Nothing clears work until it has a row in [`quality_reports/qualification/LEDGER
 ## Commands
 
 ```bash
-# LaTeX (3-pass, XeLaTeX only)
-cd Slides && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
+# LaTeX (3-pass, XeLaTeX only) — for slides/ (Beamer) or paper/ (article class)
+cd slides   # or: cd paper
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
 BIBINPUTS=..:$BIBINPUTS bibtex file
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
 
-# Deploy Quarto to GitHub Pages
-./scripts/sync_to_docs.sh LectureN
+# Stata replication pipeline (one-command reproduction)
+do scripts/stata/99_run_all.do
+# Or via /stata-replication, which scaffolds + executes through the stata-mcp MCP server
 
 # Quality score
-python scripts/quality_score.py Quarto/file.qmd
-
-# Palette sync (LaTeX ↔ SCSS)
-./scripts/check-palette-sync.sh
+python scripts/quality_score.py slides/file.tex
 
 # Backtest: is the repo internally consistent and currently true?
 # (surface-sync + skill-integrity + model-versions + links + spec-conformance + staleness + repo-hygiene + derived-counts + ledger-coverage + hook-battery)
 # Run this after ANY change. Also runs in pre-commit and CI.
 ./scripts/backtest.sh
 ```
-
-**Palette contract:** color names in `Preambles/header.tex` must match SCSS variables in `Quarto/theme-template.scss`. See [`Preambles/README.md`](Preambles/README.md).
 
 ---
 
@@ -124,41 +163,42 @@ Enforced by `/commit` (halts + asks for override) **and** — once you run `./sc
 
 The full table of all skills lives in [README.md](README.md#skills-claudeskills). Most-used, by workflow:
 
-- **Slides / teaching:** `/create-lecture` `/compile-latex` `/deploy` `/qa-quarto` `/slide-excellence` `/syllabus` `/teach-from-paper` `/scaffold-exercises`
-- **Papers / review:** `/review-paper` (`--peer`) `/seven-pass-review` `/respond-to-referees` `/verify-claims` `/proofread` `/humanize` `/submission-disclosures`
-- **Data / reproducibility:** `/data-analysis` `/simulation-study` `/audit-reproducibility` `/diagnose` `/replication-package` `/capture-environment` `/power-analysis` `/disclosure-check`
-- **Research / writing:** `/interview-me` `/lit-review` `/research-ideation` `/preregister` `/grant-proposal` `/data-management-plan`
+- **Slides (research presentations):** `/compile-latex` `/visual-audit` `/slide-excellence` `/proofread`
+- **Papers / dissertation chapter:** `/review-paper` (`--peer`) `/seven-pass-review` `/respond-to-referees` `/verify-claims` `/proofread` `/humanize` `/submission-disclosures`
+- **Data / reproducibility (Stata):** `/stata-replication` `/audit-reproducibility` `/diagnose` `/replication-package` `/capture-environment` `/power-analysis` `/disclosure-check`
+- **Research / writing:** `/interview-me` `/lit-review` `/research-ideation` `/preregister` `/coauthor-brief`
 - **Verification / rigor:** `/vaccinate` `/challenge` `/oracle-review` `/adjudicate-review` `/differential-audit` `/blast-radius` `/verify-artifact` `/credible-claims` `/deep-audit`
-- **Meta / workflow:** `/commit` `/learn` `/new-skill` `/checkpoint` `/context-status` `/deep-audit` `/coauthor-brief` `/triage-inbox`
+- **Meta / workflow:** `/commit` `/learn` `/new-skill` `/checkpoint` `/context-status` `/triage-inbox`
 
-Stata (`/stata-replication`), R packages (`/r-package-check`), TikZ (`/extract-tikz`, `/new-diagram`), and more — see the README for the complete index.
+`/data-analysis`, `/review-r`, `/r-package-check`, `/simulation-study` are R-pipeline skills —
+**dormant** in this project (no R pipeline; kept on disk in case a future coauthor needs them).
+TikZ tooling (`/extract-tikz`, `/new-diagram`) is likewise dormant unless you draw diagrams
+(e.g. a causal DAG) directly inside a Beamer slide.
 
 ---
 
-<!-- CUSTOMIZE: Replace placeholder rows ([your-env], [.your-class]) with your own.
-     Delete the rows marked "(example — delete)" once you've added yours. -->
+## Beamer Palette (`preambles/header.tex`)
 
-## Beamer Custom Environments
-
-| Environment | Effect | Use Case |
+| Color | Hex | Use |
 | --- | --- | --- |
-| `[your-env]` | [Description] | [When to use] |
-| `keybox` | Gold background box | Key points *(example — delete)* |
-| `definitionbox[Title]` | Blue-bordered titled box | Formal definitions *(example — delete)* |
+| `primary-blue` | `#012169` | headings, accents |
+| `primary-gold` | `#B9975B` | emphasis, borders |
+| `highlight-yellow` | `#F2A900` | markers, alerts |
+| `positive` | `#15803D` | good / observed / identified |
+| `negative` | `#B91C1C` | bad / problematic / bias |
+| `neutral` | `#525252` | reference / context |
 
-## Quarto CSS Classes
-
-| Class | Effect | Use Case |
-| --- | --- | --- |
-| `[.your-class]` | [Description] | [When to use] |
-| `.smaller` | 85% font | Dense content *(example — delete)* |
-| `.positive` | Green bold | Good annotations *(example — delete)* |
+No `\newtcolorbox` environments are defined yet in `preambles/header.tex` — add one here when
+you create it (e.g. a results-highlight box), rather than inventing table rows for boxes that
+don't exist.
 
 ---
 
 ## Current Project State
 
-| Lecture | Beamer | Quarto | Key Content |
-| --- | --- | --- | --- |
-| HelloWorld *(sample — delete when ready)* | `HelloWorld.tex` | `HelloWorld.qmd` | Minimal deck to verify setup |
-| 1: [Topic] | `Lecture01_Topic.tex` | `Lecture1_Topic.qmd` | [Brief description] |
+| Artifact | File(s) | Status |
+| --- | --- | --- |
+| HelloWorld *(sample — delete when ready)* | `slides/HelloWorld.tex` | Minimal deck to verify LaTeX setup |
+| Dissertation chapter draft | `paper/` *(empty — first draft not yet started)* | — |
+| Research presentation slides | `slides/` *(empty — first deck not yet started)* | — |
+| Stata pipeline | `scripts/stata/` *(empty — scaffold via `/stata-replication`)* | — |

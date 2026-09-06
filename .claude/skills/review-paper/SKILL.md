@@ -38,7 +38,7 @@ One comprehensive review report. Fast, low token cost, suitable for early drafts
 
 ### Adversarial mode (`--adversarial`)
 
-Iterative critic-fixer loop modeled on [`/qa-quarto`](../qa-quarto/SKILL.md). The critic identifies issues, the fixer proposes and applies edits (with user approval), and the critic re-audits. Loops until APPROVED or max 5 rounds.
+Iterative critic-fixer loop (the same fan-out → reduce → judge, loop-until-dry primitive documented in [`orchestrator-protocol.md`](../../rules/orchestrator-protocol.md)). The critic identifies issues, the fixer proposes and applies edits (with user approval), and the critic re-audits. Loops until APPROVED or max 5 rounds.
 
 Use when: preparing a pre-submission draft, responding to a journal-desk rejection with substantive revisions, or after your own major rewrite. Costs more tokens but produces a manuscript the critic has signed off on.
 
@@ -250,7 +250,7 @@ These are the tough questions a top referee would likely raise:
 
 **Only runs if `--adversarial` is in `$ARGUMENTS`.**
 
-Pattern adapted from [`/qa-quarto`](../qa-quarto/SKILL.md), which uses the same loop to iterate on slide quality. Papers get it now because the single-pass review leaves authors doing manual fix-and-resubmit cycles.
+Same critic-fixer, loop-until-dry primitive as the rest of the orchestrator (see [`orchestrator-protocol.md`](../../rules/orchestrator-protocol.md)). Papers get it because the single-pass review leaves authors doing manual fix-and-resubmit cycles.
 
 ### Flow
 

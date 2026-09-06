@@ -49,16 +49,10 @@ GROUND_TRUTH = {
 SURFACES = [
     REPO / "README.md",
     REPO / "CLAUDE.md",
-    REPO / "guide/workflow-guide.qmd",
-    REPO / "docs/workflow-guide.html",
-    # The render that lands beside the .qmd. It is byte-identical to the docs/
-    # copy above (`cmp` clean at 2026-08-23) but was NOT scanned, so eleven
-    # inventory sites in it — the same eleven the docs/ copy is gated on — took
-    # a planted 99 with both gates green during the 76-site sweep. Cheap to
-    # close, and it keeps the pair from diverging silently if one is re-rendered
-    # and the other is not.
-    REPO / "guide/workflow-guide.html",
-    REPO / "docs/index.html",
+    # guide/workflow-guide.{qmd,html} and docs/workflow-guide.html, docs/index.html
+    # were dropped from this list when this fork removed the Quarto/GitHub-Pages
+    # publish path entirely (marriage-norms is a private research project, not
+    # a public template with its own landing page/guide to maintain).
     REPO / "templates/skill-template.md",
     # The `/commit` skill's Step 0b quotes the inventory compound verbatim
     # ("18 agents, 60 skills, 37 rules, 8 hooks") as the worked example of what

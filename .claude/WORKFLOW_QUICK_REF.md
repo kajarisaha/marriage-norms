@@ -48,26 +48,24 @@ Repeat
 
 ---
 
-## Non-Negotiables (Customize These)
+## Non-Negotiables
 
-<!-- Replace with YOUR project's locked-in preferences -->
-
-- [YOUR PATH CONVENTION] (e.g., `here::here()` for R, relative paths for LaTeX)
-- [YOUR SEED CONVENTION] (e.g., `set.seed()` once at top for stochastic code)
-- [YOUR FIGURE STANDARDS] (e.g., white bg, 300 DPI, custom theme)
-- [YOUR COLOR PALETTE] (e.g., institutional colors)
-- [YOUR TOLERANCE THRESHOLDS] (e.g., 1e-6 for point estimates)
+- **Paths:** all relative from repo root; LaTeX resolves via `TEXINPUTS=../preambles`.
+- **FE/clustering:** individual + year + governorate×year FE, `vce(cluster individual_id)` — always, no `, robust` substitutions.
+- **Round availability:** check `CLAUDE.md`'s outcome-by-round table before any code touching LFP / domestic work hours / gender-role attitudes.
+- **Figure standards:** `graph export` both PDF (vector, paper) and PNG (raster, slides); never rely on the `.gph` binary format.
+- **Color palette:** `primary-blue #012169`, `primary-gold #B9975B`, `highlight-yellow #F2A900`, `positive #15803D`, `negative #B91C1C`, `neutral #525252` (`preambles/header.tex`).
+- **Tolerance thresholds:** point estimates < 0.01, SEs < 0.05, N exact — see `quality-gates.md` / `replication-protocol.md`.
 
 ---
 
 ## Preferences
 
-<!-- Fill in as you discover your working style -->
-
-**Visual:** [How you want figures/plots handled]
-**Reporting:** [Concise bullets? Detailed prose? Details on request?]
+**Visual:** figures via Stata `graph export` only — never hand-drawn or typed into a table.
+**Reporting:** concise; this is a working research session, not a teaching narrative.
 **Session logs:** Always (post-plan, incremental, end-of-session)
-**Replication:** [How strict? Flag near-misses?]
+**Replication:** strict — flag near-misses as EXPLAINED only with a named alternative spec, never silently.
+**Check-ins:** more frequent during the first few sessions while the user learns the workflow — confirm before large/irreversible steps rather than batching silently.
 
 ---
 

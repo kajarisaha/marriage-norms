@@ -127,11 +127,10 @@ A forked subagent cannot stop to ask the user a question. So every interactive c
 | `/commit` | verify (Step 2), score (Step 6) | Halts on failure; `.githooks/pre-commit` enforces the same gates on every commit |
 | `/seven-pass-review` | fan-out (7 lenses) → reduce → judge **+ hallucination gate** | Submission-ready / R&R papers |
 | `/slide-excellence` | conditional fan-out → reduce | Spawns only lenses that can produce output; does not auto-fix |
-| `/qa-quarto` | critic → fix → re-audit, **loop-until-dry** | Beamer↔Quarto parity; hard gates = CRITICAL roll-up |
-| `/review-paper --adversarial` | critic → fix → re-audit, **loop-until-dry** | Manuscript review (same primitive as qa-quarto) |
+| `/review-paper --adversarial` | critic → fix → re-audit, **loop-until-dry** | Manuscript review |
 | `/review-paper --peer` / `--variance` | RUN_CONFIG → editor → fan-out referees → editor synthesis **+ hallucination gate** | Cross-artifact pre-flight as Phase 0 |
 | `/deep-audit` | mechanical checks → fan-out (4) → fix, **loop-until-dry** | Repo-wide consistency |
-| `/create-lecture`, `/data-analysis` | Pre-Flight → draft → verify | Pre-Flight required |
+| `/stata-replication` | Pre-Flight → scaffold/execute → verify | Pre-Flight required |
 
 ## What is NOT automatic
 

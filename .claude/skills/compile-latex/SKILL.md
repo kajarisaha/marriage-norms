@@ -1,30 +1,34 @@
 ---
 name: compile-latex
-description: Compile a Beamer LaTeX slide deck with XeLaTeX (3 passes + bibtex). Use when user says "compile", "build the slides", "rebuild the PDF", "run latex", "render the tex", or asks why a `.tex` file isn't producing a PDF. Operates on `Slides/*.tex`.
-argument-hint: "[filename without .tex extension]"
+description: Compile a LaTeX document (Beamer research-presentation deck under `slides/`, or the paper draft under `paper/`) with XeLaTeX (3 passes + bibtex). Use when user says "compile", "build the slides", "build the paper", "rebuild the PDF", "run latex", "render the tex", or asks why a `.tex` file isn't producing a PDF.
+argument-hint: "[slides/<name> or paper/<name>, without .tex extension]"
 allowed-tools: ["Read", "Bash", "Glob"]
 ---
 
-# Compile Beamer LaTeX Slides
+# Compile LaTeX (Beamer slides or paper draft)
 
-Compile a Beamer slide deck using XeLaTeX with full citation resolution.
+Compile a `.tex` file using XeLaTeX with full citation resolution. `$ARGUMENTS` is a path
+relative to the repo root, without the `.tex` extension (e.g. `slides/results_talk` or
+`paper/chapter1`). If no directory prefix is given, default to `slides/`.
 
 ## Steps
 
-1. **Navigate to Slides/ directory** and compile with 3-pass sequence:
+1. **Determine the directory and filename** from `$ARGUMENTS`, then compile with the 3-pass sequence:
 
 ```bash
-cd Slides
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
-BIBINPUTS=..:$BIBINPUTS bibtex $ARGUMENTS
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
+DIR=$(dirname "$ARGUMENTS")     # slides or paper
+FILE=$(basename "$ARGUMENTS")
+cd "$DIR"
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode "$FILE.tex"
+BIBINPUTS=..:$BIBINPUTS bibtex "$FILE"
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode "$FILE.tex"
+TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode "$FILE.tex"
 ```
 
 **Alternative (latexmk):**
 ```bash
-cd Slides
-TEXINPUTS=../Preambles:$TEXINPUTS BIBINPUTS=..:$BIBINPUTS latexmk -xelatex -interaction=nonstopmode $ARGUMENTS.tex
+cd "$DIR"
+TEXINPUTS=../preambles:$TEXINPUTS BIBINPUTS=..:$BIBINPUTS latexmk -xelatex -interaction=nonstopmode "$FILE.tex"
 ```
 
 2. **Check for warnings:**
@@ -34,8 +38,8 @@ TEXINPUTS=../Preambles:$TEXINPUTS BIBINPUTS=..:$BIBINPUTS latexmk -xelatex -inte
 
 3. **Open the PDF** for visual verification:
    ```bash
-   open Slides/$ARGUMENTS.pdf          # macOS
-   # xdg-open Slides/$ARGUMENTS.pdf    # Linux
+   open "$DIR/$FILE.pdf"          # macOS
+   # xdg-open "$DIR/$FILE.pdf"    # Linux
    ```
 
 4. **Report results:**
@@ -52,5 +56,8 @@ TEXINPUTS=../Preambles:$TEXINPUTS BIBINPUTS=..:$BIBINPUTS latexmk -xelatex -inte
 
 ## Important
 - **Always use XeLaTeX**, never pdflatex
-- **TEXINPUTS** is required: your Beamer theme lives in `Preambles/`
-- **BIBINPUTS** is required: your `.bib` file lives in the repo root
+- **TEXINPUTS** is required: the shared preamble lives in `preambles/`
+- **BIBINPUTS** is required: `Bibliography_base.bib` lives in the repo root
+- `slides/` decks are Beamer; `paper/` drafts are typically `article` class — the same 3-pass
+  sequence applies to both, `preambles/header.tex` guards its Beamer-only content with
+  `\@ifundefined{beamertemplate}` so it's safe to `\input{header}` from either.

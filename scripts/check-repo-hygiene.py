@@ -25,8 +25,8 @@ ROOT_ALLOW = {
     "voice-profile.md",
 }
 ROOT_ALLOW_DIRS = {
-    ".claude", ".git", ".github", ".githooks", ".vscode", "Figures", "Preambles",
-    "Quarto", "Slides", "docs", "explorations", "guide", "master_supporting_docs",
+    ".claude", ".git", ".github", ".githooks", ".vscode", "preambles", "slides",
+    "paper", "data", "output", "explorations", "master_supporting_docs",
     "quality_reports", "scripts", "templates",
 }
 
